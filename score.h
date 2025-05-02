@@ -20,5 +20,5 @@ typedef struct {
     std::vector<std::string> id;
 } PRS_dat;
 
-void score(const std::string &vcf_path,  const std::string &msp_path, std::unordered_map<std::string, Dat*> &dat_dict);
+void score(const std::string &vcf_path,  const std::string &msp_path, int anc, std::unordered_map<std::string, Dat*> &dat_dict);
 

@@ -16,8 +16,10 @@ void print_use() {
     << "-msp (required) path to the directory containing Rfmix2 solved local ancestry files." << endl << endl
     << "-covar (optional) path to the covariate file. Covariates will be reading from the first column. There is no header for the covariate file." << endl << endl
     << "-out (required) path to the output file." << endl << endl
-    << "-rho (required) Cross-ancestry genetic correlation." << endl << endl	
+    << "-rho (required) Cross-ancestry genetic correlation. Default is 0.9." << endl << endl	
     << "-thread (optional) Number of threads to use." << endl <<endl
+    << "-anc (optional) Number corresponding to EUR ancestry in the RFmix file. Default is 0." << endl << endl
+    << "-maf (optional) MAF for filtering (MAF < threshold in both ancestry will be removed) and defining ancestry enriched SNPs. Default is 0.01." << endl << endl
     << "-h print the options." << endl << endl;
 }
 
@@ -29,12 +31,13 @@ int main(int argc, char *argv[]) {
 	return 0;
     }
 
-    double rho = 0;
+    double rho = 0.9;
 
     std::string pheno_path, geno1_path, \
         geno2_path, vcf_path, msp_path, out_path, covar_path;
 
-    int i = 1, iter = 1000, burn = 500, thread = 1;
+    int i = 1, iter = 1000, burn = 500, thread = 1, anc = 0;
+    double maf = 0.01;
     while (i < argc) {
         if (strcmp(argv[i], "-pheno") == 0) {
             pheno_path = argv[i+1];
@@ -60,7 +63,15 @@ int main(int argc, char *argv[]) {
             rho = std::stod(argv[i+1]);
             i += 2;
         }
-        else if (strcmp(argv[i], "-out") == 0) {
+	else if (strcmp(argv[i], "-anc") == 0) {
+	    anc = std::stoi(argv[i+1]);
+	    i += 1;
+	}
+        else if (strcmp(argv[i], "-maf") == 0) {
+	    maf = std::stod(argv[i+1]);
+	    i += 1;
+	}
+	else if (strcmp(argv[i], "-out") == 0) {
             out_path = argv[i+1];
             i += 2;
         }
@@ -84,7 +95,7 @@ int main(int argc, char *argv[]) {
 
     get_size_vcf(pheno_path.c_str(), vcf_path.c_str(), &dat);
 
-    read_lanc(vcf_path.c_str(), msp_path.c_str(), &dat);
+    read_lanc(vcf_path.c_str(), msp_path.c_str(), anc, &dat);
 
     read_pheno(pheno_path.c_str(), &dat);
 
@@ -93,8 +104,6 @@ int main(int argc, char *argv[]) {
     }
 
     //linear(&dat, out_path.c_str());
-
-    double maf = 0.01;
 
     check_maf(&dat, maf);
 

@@ -59,6 +59,8 @@ int main(int argc, char *argv[]) {
 
     std::string pheno_path, vcf_path, msp_path, out_path, covar_path;
 
+    int anc = 0;
+
     int i = 1, thread = 1;
     while (i < argc) {
         if (strcmp(argv[i], "-pheno") == 0) {
@@ -72,6 +74,10 @@ int main(int argc, char *argv[]) {
         else if (strcmp(argv[i], "-msp") == 0) {
             msp_path = argv[i+1];
             i += 2;
+        }
+	else if (strcmp(argv[i], "-anc") == 0) {
+            anc = std::stoi(argv[i+1]);
+            i += 1;
         }
         else if (strcmp(argv[i], "-out") == 0) {
             out_path = argv[i+1];
@@ -89,7 +95,7 @@ int main(int argc, char *argv[]) {
 
     get_size_vcf(pheno_path.c_str(), vcf_path.c_str(), &dat);
 
-    read_lanc(vcf_path.c_str(), msp_path.c_str(), &dat);
+    read_lanc(vcf_path.c_str(), msp_path.c_str(), anc, &dat);
 
     read_pheno(pheno_path.c_str(), &dat);
 

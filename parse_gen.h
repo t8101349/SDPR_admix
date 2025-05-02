@@ -40,7 +40,7 @@ void read_pheno(const std::string &pheno_path, Dat *dat);
 
 void read_cov(const std::string &cov_path,  Dat *dat);
 
-void read_lanc(const std::string &vcf_path,  const std::string &msp_path, Dat *dat);
+void read_lanc(const std::string &vcf_path,  const std::string &msp_path, int anc, Dat *dat);
 
 void check_maf(Dat *dat, double maf);
 

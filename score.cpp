@@ -104,7 +104,7 @@ void get_size_vcf(const std::string &vcf_path, PRS_dat* prs_dat) {
 	std::to_string(n_ind) + " individuals to be readed." << endl;
 }
 
-void score(const std::string &vcf_path,  const std::string &msp_path, unordered_map<string, Dat*> &dat_dict, PRS_dat* prs_dat) {
+void score(const std::string &vcf_path,  const std::string &msp_path, int anc, unordered_map<string, Dat*> &dat_dict, PRS_dat* prs_dat) {
     
     string line1, line2;
     string token1, token2;
@@ -271,14 +271,14 @@ void score(const std::string &vcf_path,  const std::string &msp_path, unordered_
 			cout << "Missing genotype not supported yet." << endl;
 			exit(1);
 		    }
-		    if (hap_lanc[2*(idx2-9)] == 0) {
+		    if (hap_lanc[2*(idx2-9)] == anc) {
 			prs_dat->geno1[k] += beta1 * std::stod(&token2[0]); 
 		    }
 		    else {
 			prs_dat->geno2[k] += beta2 * std::stod(&token2[0]);
 		    }
 
-		    if (hap_lanc[2*(idx2-9)+1] == 0) {
+		    if (hap_lanc[2*(idx2-9)+1] == anc) {
 			prs_dat->geno1[k] += beta1 * std::stod(&token2[2]);
 		    }
 		    else  {
@@ -337,6 +337,8 @@ int main(int argc, char *argv[]) {
 
 	std::string score_path, vcf_path, msp_path, out_path;
 
+	int anc = 0;
+
 	if (argc == 1) {
 	    print_use();
 	    return 0;
@@ -356,6 +358,10 @@ int main(int argc, char *argv[]) {
 	    else if (strcmp(argv[i], "-msp") == 0) {
 		msp_path = argv[i+1];
 		i += 2;
+	    }
+	    else if (strcmp(argv[i], "-anc") == 0) {
+	        anc = std::stoi(argv[i+1]);
+                i += 1;
 	    }
 	    else if (strcmp(argv[i], "-out") == 0) {
 		out_path = argv[i+1];
@@ -388,7 +394,7 @@ int main(int argc, char *argv[]) {
 		    prs_dat.geno1 = (double *) calloc(prs_dat.n_ind, sizeof(double));
 		    prs_dat.geno2 = (double *) calloc(prs_dat.n_ind, sizeof(double));
 		}
-		score(vcf_chr.c_str(), msp_chr.c_str(), dat_dict, &prs_dat);
+		score(vcf_chr.c_str(), msp_chr.c_str(), anc, dat_dict, &prs_dat);
 	    }
 	}
 	else {
@@ -396,7 +402,7 @@ int main(int argc, char *argv[]) {
 	    get_size_vcf(vcf_path.c_str(), &prs_dat);
 	    prs_dat.geno1 = (double *) calloc(prs_dat.n_ind, sizeof(double));
 	    prs_dat.geno2 = (double *) calloc(prs_dat.n_ind, sizeof(double));
-	    score(vcf_path.c_str(), msp_path.c_str(), dat_dict, &prs_dat);
+	    score(vcf_path.c_str(), msp_path.c_str(), anc, dat_dict, &prs_dat);
 	}
 	
 	unordered_map<string, Dat*>::iterator it;

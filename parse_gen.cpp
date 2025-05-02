@@ -140,7 +140,7 @@ void read_cov(const std::string &cov_path,  Dat *dat) {
     infile.close();
 }
 
-void read_lanc(const std::string &vcf_path,  const std::string &msp_path, Dat *dat) {
+void read_lanc(const std::string &vcf_path,  const std::string &msp_path, int anc, Dat *dat) {
     
     string line1, line2;
     string token1, token2;
@@ -308,7 +308,7 @@ void read_lanc(const std::string &vcf_path,  const std::string &msp_path, Dat *d
 			cout << "Missing genotype not supported yet." << endl;
 			return;
 		    }
-		    if (hap_lanc[2*(idx2-9)] == 0) {
+		    if (hap_lanc[2*(idx2-9)] == anc) {
 			dat->geno1[idx_snp][k] += std::stod(&token2[0]);
 			dat->n_anc1[idx_snp]++;
 		    }
@@ -317,7 +317,7 @@ void read_lanc(const std::string &vcf_path,  const std::string &msp_path, Dat *d
 			dat->n_anc2[idx_snp]++;
 		    }
 
-		    if (hap_lanc[2*(idx2-9)+1] == 0) {
+		    if (hap_lanc[2*(idx2-9)+1] == anc) {
 			dat->geno1[idx_snp][k] += std::stod(&token2[2]);
 			dat->n_anc1[idx_snp]++;
 		    }
