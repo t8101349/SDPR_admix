@@ -392,8 +392,13 @@ void mcmc(Dat *dat, std::string out_path, int iter, int burn, double maf, double
 		state.sumsq[state.assgn[i]] += square(state.beta2[i]) / 2.0;
 	    }
 	    else {
-		state.sumsq[state.assgn[i]] += ( square(state.beta1[i]) + square(state.beta2[i]) - \
+		if (state.rho > 0.99) {
+		    state.sumsq[state.assgn[i]] += ( square(state.beta1[i]) + square(state.beta2[i]) ) / 4.0;
+		}
+		else {
+                    state.sumsq[state.assgn[i]] += ( square(state.beta1[i]) + square(state.beta2[i]) - \
 			2 * state.rho * state.beta1[i] * state.beta2[i] ) / (2 * (1 - square(state.rho)) );
+		}
 	    }
 	}
 
@@ -587,7 +592,7 @@ void mcmc(Dat *dat, std::string out_path, int iter, int burn, double maf, double
 	    }
 	}
 
-	if (n_mcmc % 1 == 0) {
+	if (n_mcmc % 100 == 0) {
 	    std::ostringstream eta_out;
 	    eta_out << state.eta;
 	    std::string strobj = eta_out.str();

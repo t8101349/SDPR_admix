@@ -31,7 +31,7 @@ void read_score(const std::string &score_path, unordered_map<string, Dat*> &dat_
 
     string id, A1, A2, line;
     double beta1, beta2;
-    int chr;
+    string chr;
     unsigned pos;
 
     int n_snp = 0;
@@ -40,7 +40,12 @@ void read_score(const std::string &score_path, unordered_map<string, Dat*> &dat_
 	std::istringstream ss(line);
 	ss >> chr >> pos >> id >> A1 >> A2 >> beta1 >> beta2;
 	Dat *dat = new Dat;
-	dat->chr = chr;
+	if (chr.find("chr") == 0) {
+	    dat->chr = std::stoi(chr.substr(3));
+	}
+	else {
+	    dat->chr = std::stoi(chr);
+	}
 	dat->pos = pos;
 	dat->A1 = A1;
 	dat->A2 = A2;
@@ -67,12 +72,13 @@ void get_size_vcf(const std::string &vcf_path, PRS_dat* prs_dat) {
     while (gzgets(infile2, buffer, 4096)) {
         // Remove the newline character if it exists
         size_t length = strlen(buffer);
-        if (length > 0 && buffer[length - 1] == '\n') {
-            buffer[length - 1] = '\0';
+	line.append(buffer);
+        if (length > 0 && buffer[length - 1] != '\n') {
+            continue;
         }
-	line = buffer;
+	
 	if (line.find("##") == 0) {
-	    continue;
+	    line.clear();
 	}
 	else if (line.find("#") == 0) {
 	    int idx = 0;
@@ -83,9 +89,11 @@ void get_size_vcf(const std::string &vcf_path, PRS_dat* prs_dat) {
 		}
 		idx++;
 	    }
+	    line.clear();
 	    n_ind = idx - 9;
 	}
 	else {
+	    line.clear();
 	    n_snp++;
 	}
     }
@@ -93,7 +101,7 @@ void get_size_vcf(const std::string &vcf_path, PRS_dat* prs_dat) {
     prs_dat->n_ind = n_ind;
     gzclose(infile2);
     cout << "In total " + std::to_string(n_snp) + " SNPs and " + \
-	std::to_string(n_ind) + " to be readed." << endl;
+	std::to_string(n_ind) + " individuals to be readed." << endl;
 }
 
 void score(const std::string &vcf_path,  const std::string &msp_path, unordered_map<string, Dat*> &dat_dict, PRS_dat* prs_dat) {
@@ -118,14 +126,17 @@ void score(const std::string &vcf_path,  const std::string &msp_path, unordered_
     while (gzgets(infile2, buffer, 4096)) {
 	// Remove the newline character if it exists
         size_t length = strlen(buffer);
-        if (length > 0 && buffer[length - 1] == '\n') {
-            buffer[length - 1] = '\0';
+        line2.append(buffer); 
+	if (length > 0 && buffer[length - 1] != '\n') {
+            continue;
         }
-	line2 = buffer;
+	
 	if (line2.find("##") == 0) {
+	    line2.clear();
 	    continue;
 	}
 	else if (line2.find("#") == 0) {
+	    line2.clear();
 	    continue;
 	}
 	else {
@@ -143,7 +154,12 @@ void score(const std::string &vcf_path,  const std::string &msp_path, unordered_
     for (; idx2<9; idx2++) {
 	getline(iss2, token2, '\t');
 	if (idx2 == 0) {
-	    chr_vcf = std::stoi(token2);
+	   if (token2.find("chr") == 0) { 
+               chr_vcf = std::stoi(token2.substr(3));
+	   }
+	   else {
+               chr_vcf = std::stoi(token2);
+	   }
 	}
 	if (idx2 == 1) {
 	    pos = std::stoul(token2);
@@ -159,7 +175,12 @@ void score(const std::string &vcf_path,  const std::string &msp_path, unordered_
 	for (int idx1=0; idx1<2*n_ind+6; idx1++) {
 	    getline(iss1, token1, '\t'); 
 	    if (idx1 == 0) {
-		chr_msp = std::stoi(token1);
+		if (token1.find("chr") == 0) {
+		    chr_msp = std::stoi(token1.substr(3));
+		}
+		else {
+	            chr_msp = std::stoi(token1);
+		}
 	    }
 	    else if (idx1 == 1) {
 		spos = std::stoul(token1);
@@ -169,7 +190,7 @@ void score(const std::string &vcf_path,  const std::string &msp_path, unordered_
 	    }
 	    else if (idx1 >= 6) {
 		hap_lanc[idx1-6] = std::stoi(token1);
-		if (hap_lanc[idx1-6] != 0 && hap_lanc[idx1-6] != 1) {
+		if (hap_lanc[idx1-6] != 0 && hap_lanc[idx1-6] != 1 && hap_lanc[idx1-6] != 2) {
 		    cout << "RFmix field must be either 0 or 1." << endl;
 		    return;
 		}
@@ -269,21 +290,30 @@ void score(const std::string &vcf_path,  const std::string &msp_path, unordered_
 	    
 	    // read the next line of vcf and update pos
 	    assert(idx2 == n_ind+9);
+
+	    line2.clear();
 	    
 	    if (gzgets(infile2, buffer, 4096)) {
 		// Remove the newline character if it exists
 		size_t length = strlen(buffer);
-		if (length > 0 && buffer[length - 1] == '\n') {
-		    buffer[length - 1] = '\0';
+		line2.append(buffer);
+		while (length > 0 && buffer[length - 1] != '\n') {
+		    gzgets(infile2, buffer, 4096);
+		    length = strlen(buffer);
+		    line2.append(buffer);
 		}
-		line2 = buffer;
 		
 		iss2.clear();
 		iss2.str(line2);
 		for (idx2=0; idx2<9; idx2++) {
 		    getline(iss2, token2, '\t');
 		    if (idx2 == 0) {
-			chr_vcf = std::stoi(token2);
+			if (token2.find("chr") == 0) {
+			    chr_vcf = std::stoi(token2.substr(3));
+			}
+			else {
+			    chr_vcf = std::stoi(token2);
+			}
 		    }
 		    if (idx2 == 1) {
 			pos = std::stoul(token2);

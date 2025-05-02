@@ -242,8 +242,8 @@ void read_lanc(const std::string &vcf_path,  const std::string &msp_path, Dat *d
 	    }
 	    else if (idx1 >= 6) {
 		hap_lanc[idx1-6] = std::stoi(token1);
-		if (hap_lanc[idx1-6] != 0 && hap_lanc[idx1-6] != 1) {
-		    cout << "RFmix field must be either 0 or 1." << endl;
+		if (hap_lanc[idx1-6] != 0 && hap_lanc[idx1-6] != 1 && hap_lanc[idx1-6] != 2) {
+		    cout << "RFmix field must be either 0, 1 or 2." << endl;
 		    return;
 		}
 	    }
@@ -453,7 +453,7 @@ void check_maf(Dat *dat, double maf) {
 	dat->maf1[i] = mean1;
 	dat->maf2[i] = mean2;
 
-	if (mean1 < maf || mean1 > 1-maf || mean2 < maf || mean2 > 1-maf) {
+	if ( mean1 < maf && mean2 < maf) {
 	    n_bad++;
 	    continue;
 	}

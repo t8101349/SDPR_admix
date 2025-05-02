@@ -1,8 +1,14 @@
 #include "regress.h"
+#include "parse_gen.h"
+#include <cstring>
+#include "gsl/gsl_randist.h"
+#include "gsl/gsl_statistics_double.h"
+#include "gsl/gsl_blas.h"
+using std::cout; using std::endl;
 
 using std::cout; using std::endl; 
 
-void linear(Dat *dat, std::string out_path) {
+void linear(Dat *dat, std::string out_path, int thread) {
     gsl_multifit_linear_workspace *work = gsl_multifit_linear_alloc(dat->n_ind, dat->n_cov+2);
 
     gsl_vector *y = gsl_vector_alloc(dat->n_ind);
@@ -36,7 +42,7 @@ void linear(Dat *dat, std::string out_path) {
 	se1 = gsl_matrix_get(cov, dat->n_cov, dat->n_cov);
 	eff2 = gsl_vector_get(beta, dat->n_cov+1);
 	se2 = gsl_matrix_get(cov, dat->n_cov+1, dat->n_cov+1);
-	out << eff1 << "\t" << se1 << "\t" << eff2 << "\t" << se2 << endl;
+	out << dat->id[i] << "\t" << dat->ref[i] << "\t" << dat->alt[i] << "\t" << eff1 << "\t" << se1 << "\t" << eff2 << "\t" << se2 << endl;
     }
 
     out.close();
@@ -46,5 +52,50 @@ void linear(Dat *dat, std::string out_path) {
     gsl_matrix_free(X);
     gsl_matrix_free(cov);
     gsl_multifit_linear_free(work);
+}
+
+int main(int argc, char *argv[]) {
+    Dat dat;
+
+    std::string pheno_path, vcf_path, msp_path, out_path, covar_path;
+
+    int i = 1, thread = 1;
+    while (i < argc) {
+        if (strcmp(argv[i], "-pheno") == 0) {
+            pheno_path = argv[i+1];
+            i += 2;
+        }
+        else if (strcmp(argv[i], "-vcf") == 0) {
+            vcf_path = argv[i+1];
+            i += 2;
+        }
+        else if (strcmp(argv[i], "-msp") == 0) {
+            msp_path = argv[i+1];
+            i += 2;
+        }
+        else if (strcmp(argv[i], "-out") == 0) {
+            out_path = argv[i+1];
+            i += 2;
+        }
+        else if (strcmp(argv[i], "-covar") == 0) {
+            covar_path = argv[i+1];
+            i += 2;
+        }
+	else if (strcmp(argv[i], "-thread") == 0) {
+            thread = std::stoi(argv[i+1]);
+            i += 2;
+        }
+    }
+
+    get_size_vcf(pheno_path.c_str(), vcf_path.c_str(), &dat);
+
+    read_lanc(vcf_path.c_str(), msp_path.c_str(), &dat);
+
+    read_pheno(pheno_path.c_str(), &dat);
+
+    if (!covar_path.empty()) {
+        read_cov(covar_path.c_str(), &dat);
+    }
+    linear(&dat, out_path.c_str(), thread);
 }
 

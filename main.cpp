@@ -94,7 +94,7 @@ int main(int argc, char *argv[]) {
 
     //linear(&dat, out_path.c_str());
 
-    double maf = 0;
+    double maf = 0.01;
 
     check_maf(&dat, maf);
 
