@@ -15,6 +15,14 @@ You can then compile SDPR by running `make`. If there is run time error that the
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:path_to_SDPR_admix_dir/gsl/lib
 ```
 
+If there is run time error that the shared library "libgsl.so.25" not found, and you install libgsl.so.28, you can fix it by typing
+
+```
+cd /opt/conda/envs/test/lib(your_lib_path)
+ln -s libgsl.so.28 libgsl.so.25
+cd work_dict(your_project_dictionary)
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:path_to_SDPR_admix_dir/gsl/lib
+```
 
 ## Quick start
 
