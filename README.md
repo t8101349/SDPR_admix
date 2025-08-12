@@ -154,12 +154,12 @@ RFMix output：
 *.msp.tsv（local ancestry information）
 
 ## 🧾 Step 5: Organize SDPR_admix input data
-File Name         Description
-chr22.vcf.gz	相相後的 VCF（phased）
-chr22.msp.noheader.txt	RFMix 輸出檔（可去掉 header）
-train.pheno.txt	表型檔，欄位：FID IID phenotype
-covar.tab.txt	共變數檔，欄位：FID IID cov1 cov2 ...
-summary.ma	summary statistics for SDPR_admix
+File Name         Description \
+chr22.vcf.gz	相相後的 VCF（phased）\
+chr22.msp.noheader.txt	RFMix 輸出檔（可去掉 header）\
+train.pheno.txt	表型檔，欄位：FID IID phenotype \
+covar.tab.txt	共變數檔，欄位：FID IID cov1 cov2 ... \
+summary.ma	summary statistics for SDPR_admix \
 
 ## ▶️ Step 6: Run SDPR_admix
 
