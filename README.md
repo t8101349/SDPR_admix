@@ -155,6 +155,7 @@ RFMix output：
 
 ## 🧾 Step 5: Organize SDPR_admix input data
 |File Name     |    Description |
+| --- | --- |
 |chr22.vcf.gz | 相相後的 VCF（phased）|
 |chr22.msp.noheader.txt	| RFMix 輸出檔（可去掉 header）|
 |train.pheno.txt	| 表型檔，欄位：FID IID phenotype |
