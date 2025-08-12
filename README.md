@@ -68,7 +68,7 @@ If you have bgzipped vcf and RFMix2 local ancestry files for chr1-22 with the na
 ```
 ## Below is a step-by-step guide to the complete process, tailored to your current situation. It includes the required commands and recommended tools to help you navigate from PLINK → VCF → phasing → local ancestry → SDPR_admix.
 
-# ✅ Starting point：The data you have
+## ✅ Starting point：The data you have
 mydata.bed
 
 mydata.bim
@@ -79,7 +79,7 @@ GWAS statistics .txt (or .ma)
 
 Phenotype (to be analyzed) + covariates (if any)
 
-# 🧱 Step 1: Data Quality Control (QC)
+## 🧱 Step 1: Data Quality Control (QC)
 
 ```bash
 plink --bfile mydata \
@@ -93,7 +93,7 @@ This will produce the cleaned-up data:
 
 mydata.qc.bed/bim/fam
 
-# 🔄 Step 2: Convert to VCF format
+## 🔄 Step 2: Convert to VCF format
 
 ```bash
 plink --bfile mydata.qc \
@@ -105,8 +105,8 @@ This will produce：
 
 mydata.qc.vcf.gz
 
-# 🧬 Step 3: Phasing
-推薦使用 SHAPEIT4
+## 🧬 Step 3: Phasing
+Recommended use SHAPEIT4
 
 ```bash
 shapeit4 --input mydata.qc.vcf.gz \
@@ -117,20 +117,23 @@ shapeit4 --input mydata.qc.vcf.gz \
 ```
 If you have multiple chromosomes, you can run it multiple times or write a bash loop.
 
-🧬 步驟四：Local Ancestry 推斷（使用 RFMix v2）
-🔹 1. 準備參考族群（如 1000 Genomes）
-下載 VCF
+## 🧬 Step 4: Local Ancestry Inference (using RFMix v2）
 
-分好族群列表（如 EUR.list, AFR.list, AMR.list）
+🔹 1. Prepare a reference population (e.g., 1000 Genomes)
 
-相同 SNP/位置編號與你的目標資料
+Download VCF
 
-🔹 2. 轉換格式給 RFMix
-使用工具如 vcf2rfmix.py，輸出：
+Create a population list (e.g., EUR.list, AFR.list, AMR.list)
 
-.alleles（haplotype 資料）
+Significant SNP/location IDs with your target profile
 
-.classes（族群標籤）
+🔹 2. Convert to RFMix format
+
+Use a tool like vcf2rfmix.py to output:
+
+.alleles (haplotype data)
+
+.classes (class labels)
 
 ```bash
 python vcf2rfmix.py --vcf mydata.phased.chrXX.vcf.gz \
@@ -138,7 +141,7 @@ python vcf2rfmix.py --vcf mydata.phased.chrXX.vcf.gz \
                     --ref-labels EUR/AFR.list \
                     --out rfmix_input.chrXX
 ```
-🔹 3. 執行 RFMix
+🔹 3. run RFMix
 ```bash
 rfmix -f rfmix_input.alleles \
       -r ref_input.alleles \
@@ -146,22 +149,21 @@ rfmix -f rfmix_input.alleles \
       -g genetic_map_chrXX.txt \
       -o rfmix_output.chrXX
 ```
-RFMix 輸出：
+RFMix output：
 
 *.msp.tsv（local ancestry information）
 
-🧾 步驟五：整理 SDPR_admix 輸入資料
-檔案名稱	說明
+## 🧾 Step 5: Organize SDPR_admix input data
+File Name         Description
 chr22.vcf.gz	相相後的 VCF（phased）
 chr22.msp.noheader.txt	RFMix 輸出檔（可去掉 header）
 train.pheno.txt	表型檔，欄位：FID IID phenotype
 covar.tab.txt	共變數檔，欄位：FID IID cov1 cov2 ...
 summary.ma	summary statistics for SDPR_admix
 
-▶️ 步驟六：執行 SDPR_admix
-bash
-複製
-編輯
+## ▶️ Step 6: Run SDPR_admix
+
+```bash
 ./SDPR_admix \
   -vcf chr22.vcf.gz \
   -msp chr22.msp.noheader.txt \
@@ -169,8 +171,8 @@ bash
   -covar covar.tab.txt \
   -rho 0.9 \
   -out result_chr22.txt
-執行後會產出：
+```
+This command will produce the following outputs:
 
-每個樣本的 PRS 分數
-
-統計評估報告（若指定）
+PRS score for each sample
+Statistical evaluation report (if specified)
